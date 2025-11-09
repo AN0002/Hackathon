@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Lumina AI - Your Ultimate Learning Companion</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@google/generative-ai@0.2.1/dist/index.umd.js"></script>
+  </head>
+  <body>
+    <!-- Navigation -->
+    <nav class="navbar">
+      <div class="nav-container">
+        <div class="logo">Lumina AI</div>
+        <ul class="nav-menu">
+          <li><a href="#dashboard" class="nav-link active">Dashboard</a></li>
+          <li><a href="#test-review" class="nav-link">Test Review</a></li>
+          <li><a href="#study-tools" class="nav-link">Study Tools</a></li>
+          <li><a href="#flappy-bird" class="nav-link">Study Game</a></li>
+        </ul>
+      </div>
+    </nav>
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Dashboard Section -->
+      <section id="dashboard" class="page-section active">
+        <div class="dashboard-container">
+          <div class="dashboard-layout">
+            <!-- Left Side - Calendar (Top Left Square) -->
+            <div class="calendar-widget">
+              <div class="calendar-header-widget">
+                <button onclick="previousMonth()" class="btn-small">←</button>
+                <h3 id="calendar-month-year-widget"></h3>
+                <button onclick="nextMonth()" class="btn-small">→</button>
+              </div>
+              <div class="calendar-grid-widget" id="calendar-grid-widget"></div>
+            </div>
+            <!-- Center - Notes (Directly editable and draggable) -->
+            <div class="notes-workspace" id="notes-workspace"></div>
+            <!-- Right Side - 3 Day Schedule -->
+            <div class="schedule-widget">
+              <div class="schedule-header">
+                <h3>3-Day Schedule</h3>
+                <div class="schedule-days">
+                  <div class="schedule-day" data-day="0">
+                    <h4 id="day-0-label"></h4>
+                    <div class="schedule-hours" id="day-0-hours"></div>
+                  </div>
+                  <div class="schedule-day" data-day="1">
+                    <h4 id="day-1-label"></h4>
+                    <div class="schedule-hours" id="day-1-hours"></div>
+                  </div>
+                  <div class="schedule-day" data-day="2">
+                    <h4 id="day-2-label"></h4>
+                    <div class="schedule-hours" id="day-2-hours"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Side Buttons -->
+          <div class="side-buttons">
+            <button onclick="switchPage('test-review')" class="btn-side">
+              Test Review
+            </button>
+            <button onclick="switchPage('study-tools')" class="btn-side">
+              Study Tools
+            </button>
+            <button onclick="switchPage('flappy-bird')" class="btn-side">
+              Study Game
+            </button>
+          </div>
+          <!-- AI Assistant -->
+          <div class="ai-assistant">
+            <h3>AI Study Assistant</h3>
+            <div class="ai-chat">
+              <div id="ai-messages" class="ai-messages"></div>
+              <div class="ai-input-container">
+                <input
+                  type="text"
+                  id="ai-input"
+                  placeholder="Ask me anything about your studies..."
+                  class="ai-input"
+                />
+                <button onclick="askAI()" class="btn-primary">Send</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <!-- Test Review Section -->
+      <section id="test-review" class="page-section">
+        <div class="test-review-container">
+          <h1>Test Review with AI</h1>
+          <div class="test-review-setup">
+            <div class="input-group">
+              <label>Subject/Topic:</label>
+              <input
+                type="text"
+                id="review-topic"
+                placeholder="e.g., Mathematics, History..."
+                class="input-field"
+              />
+            </div>
+            <div class="input-group">
+              <label>Study Material (paste your notes):</label>
+              <textarea
+                id="review-material"
+                rows="10"
+                placeholder="Paste your study material here..."
+                class="input-field"
+              ></textarea>
+            </div>
+            <button onclick="generateTest()" class="btn-primary">
+              Generate Test Questions
+            </button>
+          </div>
+          <div id="test-questions" class="test-questions"></div>
+        </div>
+      </section>
+      <!-- Study Tools Section -->
+      <section id="study-tools" class="page-section">
+        <div class="study-tools-container">
+          <h1>Study Tools</h1>
+          <div class="tools-tabs">
+            <button class="tool-tab active" onclick="switchTool('flashcards')">
+              Flashcards
+            </button>
+            <button class="tool-tab" onclick="switchTool('pomodoro')">
+              Pomodoro Timer
+            </button>
+            <button class="tool-tab" onclick="switchTool('quiz')">
+              Quick Quiz
+            </button>
+          </div>
+          <div id="flashcards-tool" class="tool-content active">
+            <div class="flashcard-container">
+              <div class="flashcard-controls">
+                <button onclick="addFlashcard()" class="btn-primary">
+                  + Add Card
+                </button>
+                <button onclick="shuffleFlashcards()" class="btn-secondary">
+                  Shuffle
+                </button>
+              </div>
+              <div id="flashcards-list" class="flashcards-list"></div>
+            </div>
+          </div>
+          <div id="pomodoro-tool" class="tool-content">
+            <div class="pomodoro-container">
+              <div class="pomodoro-timer" id="pomodoro-timer">25:00</div>
+              <div class="pomodoro-controls">
+                <button onclick="startPomodoro()" class="btn-primary">
+                  Start
+                </button>
+                <button onclick="pausePomodoro()" class="btn-secondary">
+                  Pause
+                </button>
+                <button onclick="resetPomodoro()" class="btn-secondary">
+                  Reset
+                </button>
+              </div>
+              <div class="pomodoro-settings">
+                <label
+                  >Focus Time:
+                  <input
+                    type="number"
+                    id="focus-time"
+                    value="25"
+                    min="1"
+                    max="60"
+                  />
+                  min</label
+                >
+                <label
+                  >Break Time:
+                  <input
+                    type="number"
+                    id="break-time"
+                    value="5"
+                    min="1"
+                    max="30"
+                  />
+                  min</label
+                >
+              </div>
+            </div>
+          </div>
+          <div id="quiz-tool" class="tool-content">
+            <div class="quiz-container">
+              <div id="quiz-content" class="quiz-content">
+                <div id="quiz-setup">
+                  <button onclick="startQuiz()" class="btn-primary">
+                    Start Quiz
+                  </button>
+                  <p id="quiz-status" style="margin-top: 1rem">
+                    Create flashcards first, then use them for quizzes!
+                  </p>
+                </div>
+                <div id="quiz-question" style="display: none"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <!-- Flappy Bird Game Section -->
+      <section id="flappy-bird" class="page-section">
+        <div class="game-container">
+          <h1>Study Flappy Bird</h1>
+          <p class="game-description">
+            Play Flappy Bird! When you die, answer a study question to continue.
+          </p>
+          <div class="game-wrapper"><div id="game-canvas"></div></div>
+          <div id="question-modal" class="modal">
+            <div class="modal-content">
+              <h2>Study Question</h2>
+              <p id="question-text"></p>
+              <div id="question-options"></div>
+              <button onclick="submitAnswer()" class="btn-primary">
+                Submit Answer
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+    <!-- Event Modal -->
+    <div id="event-modal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Add Event</h2>
+          <button onclick="closeEventModal()" class="close-btn">×</button>
+        </div>
+        <input
+          type="text"
+          id="event-title"
+          placeholder="Event Title"
+          class="input-field"
+        />
+        <input type="time" id="event-time" class="input-field" />
+        <div class="modal-actions">
+          <button onclick="saveEvent()" class="btn-primary">Save</button>
+          <button onclick="closeEventModal()" class="btn-secondary">
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+    <script src="app.js"></script>
+    <script src="game.js"></script>
+  </body>
+</html>
